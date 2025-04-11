@@ -11,6 +11,97 @@ After integrating Application Insights with your Power Platform components (Canv
 3. Create advanced analytics with Kusto Query Language (KQL)
 4. Implement continuous improvement based on insights
 
+## Understanding Telemetry Correlation
+
+One of the most powerful features of Power Platform's Application Insights integration is end-to-end telemetry correlation. This allows you to:
+
+1. **Follow complete operation paths** from a user's click in a model-driven app through the server processing and back
+2. **Identify performance bottlenecks** across the entire operation chain
+3. **Debug issues holistically** across both client and server components
+4. **Share consistent operation IDs** with Microsoft support for faster troubleshooting
+
+When analyzing correlated telemetry, use the `operation_Id` field to track related events across different components. This ID is consistent across client actions, server processing, and database operations.
+
+> **Note**: Licensing requirement - Enablement of Application Insights is limited to customers with paid/premium Dataverse licenses available for the tenant.
+
+## Benefits of Standardized Telemetry
+
+The Power Platform's integration with Application Insights provides several significant benefits over custom telemetry solutions:
+
+1. **Reduced Development Overhead**: No need to write and maintain custom code for telemetry collection, reducing development and maintenance costs.
+
+2. **Performance Improvement**: Built-in telemetry has minimal performance impact compared to custom solutions, as it's optimized by Microsoft.
+
+3. **Consistent Experience**: Standardized telemetry follows the Application Insights data model, making it easier to analyze and correlate across different components.
+
+4. **Partner and Support Collaboration**: System integrators and partners don't need to learn custom telemetry implementations for different environments.
+
+5. **Technical Support Efficiency**: When contacting Microsoft support, the operation_id values from standardized telemetry enable faster issue resolution.
+
+## Custom Telemetry for Power Platform Components
+
+While Power Platform provides extensive built-in telemetry, you may want to supplement it with custom telemetry for specific business scenarios.
+
+### Dataverse Plugin Custom Telemetry
+
+For Dataverse plugins, Microsoft provides the `Microsoft.Xrm.Sdk.PluginTelemetry.ILogger` interface to write telemetry directly to your Application Insights resource:
+
+```csharp
+public void Execute(IServiceProvider serviceProvider)
+{
+    // Get the tracing service
+    ILogger logger = (ILogger)serviceProvider.GetService(typeof(ILogger));
+    
+    try
+    {
+        // Plugin logic
+        logger.LogInformation("Custom plugin operation completed", new Dictionary<string, object>
+        {
+            { "entityName", "account" },
+            { "operationType", "create" },
+            { "businessUnit", "sales" }
+        });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Plugin execution failed");
+        throw;
+    }
+}
+```
+
+> **Note**: Telemetry sent through the ILogger interface is sent only to your Application Insights resource and never to Microsoft.
+
+### Canvas App Custom Telemetry
+
+For Canvas apps, use the built-in `Trace` function to send custom telemetry:
+
+```
+Trace(
+    "BusinessEvent",            // Event name
+    TraceSeverity.Information,  // Severity level
+    {
+        EventCategory: "OrderProcessing", 
+        OrderAmount: Text(OrderTotal),
+        CustomerType: CustomerSegment
+    }
+)
+```
+
+### Understanding the Application Insights Schema
+
+All telemetry sent to Application Insights follows a [standardized schema](https://docs.microsoft.com/en-us/azure/azure-monitor/app/data-model) with specific tables:
+
+- **customEvents**: Contains custom events from apps and flows
+- **traces**: Contains trace messages
+- **exceptions**: Contains error information
+- **requests**: Contains incoming requests
+- **dependencies**: Contains outgoing requests
+- **pageViews**: Contains page view information
+- **browserTimings**: Contains client-side performance data
+
+Power Platform telemetry is mapped to these standard tables to provide a consistent experience when analyzing data.
+
 ## Creating Custom Dashboards
 
 ### Step 1: Create a New Dashboard
@@ -31,8 +122,6 @@ After integrating Application Insights with your Power Platform components (Canv
    - Choose appropriate time ranges
    - Select relevant metrics
 
-   ![Dashboard Configuration](../images/dashboard-configuration.png)
-
 ### Step 3: Add Custom Metric Tiles
 
 1. **Add a "Metrics chart" tile** to your dashboard
@@ -42,8 +131,6 @@ After integrating Application Insights with your Power Platform components (Canv
    - Set the aggregation type (e.g., Average, Count)
    - Configure the chart type and time range
 
-   ![Custom Metrics](../images/custom-metrics.png)
-
 ### Step 4: Add Custom Query Tiles
 
 1. **Add a "Log query" tile** to your dashboard
@@ -52,8 +139,6 @@ After integrating Application Insights with your Power Platform components (Canv
    - Enter a custom KQL query (examples below)
    - Choose a visualization type (table, chart, etc.)
    - Set the time range
-
-   ![Custom Query Tile](../images/custom-query-tile.png)
 
 ### Step 5: Share Your Dashboard
 
@@ -80,8 +165,6 @@ Alerts help you proactively monitor your Power Platform solutions.
    - Set the threshold value
    - Set the aggregation period and frequency
 
-   ![Alert Condition](../images/alert-condition.png)
-
 3. For log-based alerts:
    - Enter a custom KQL query
    - Set the condition type (Number of results, Metric measurement)
@@ -102,8 +185,6 @@ Alerts help you proactively monitor your Power Platform solutions.
    - Set the severity level (0-4)
    - Add a description
    - Set whether the rule is enabled
-
-   ![Alert Details](../images/alert-details.png)
 
 ### Example Alerts for Power Platform
 
@@ -326,8 +407,6 @@ customEvents
 
 2. **Add drill-through capabilities** for detailed analysis
 
-   ![Power BI Dashboard](../images/power-bi-dashboard.png)
-
 ### Step 4: Share and Schedule Refresh
 
 1. **Publish your dashboard** to the Power BI service
@@ -340,6 +419,11 @@ After setting up monitoring and analytics for your Power Platform solutions, pro
 
 ## Documentation References
 
+- [Analyze model-driven apps and Microsoft Dataverse telemetry with Application Insights](https://learn.microsoft.com/en-us/power-platform/admin/analyze-telemetry)
+- [Monitor canvas apps with Application Insights](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/application-insights)
+- [Monitor cloud flows with Application Insights](https://learn.microsoft.com/en-us/power-platform/admin/app-insights-cloud-flow)
+- [Write Telemetry to your Application Insights resource using ILogger](https://learn.microsoft.com/en-us/power-platform/admin/enable-use-comprehensive-auditing#write-telemetry-to-your-application-insights-resource-using-ilogger)
+- [Application Insights Data Model](https://docs.microsoft.com/en-us/azure/azure-monitor/app/data-model)
 - [Application Insights Analytics](https://docs.microsoft.com/en-us/azure/azure-monitor/app/analytics)
 - [Kusto Query Language Reference](https://docs.microsoft.com/en-us/azure/data-explorer/kusto/query/)
 - [Azure Monitor Alerts](https://docs.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-overview)
