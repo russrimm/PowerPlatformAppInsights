@@ -4,6 +4,8 @@
 
 Application Insights is an extension of Azure Monitor and provides application performance monitoring (APM) features. It's a service that monitors your live applications, automatically detects performance anomalies, and includes powerful analytics tools to help you diagnose issues and understand what users actually do with your apps.
 
+As part of Azure Monitor, Application Insights offers OpenTelemetry integration, providing a vendor-neutral approach to collecting and analyzing telemetry data across different platforms, enabling comprehensive observability of your applications.
+
 ### Key capabilities of Application Insights:
 
 - **Live metrics and real-time monitoring**: Observe your application's live metrics in real-time with sub-second latency to help diagnose issues as they happen
@@ -16,6 +18,15 @@ Application Insights is an extension of Azure Monitor and provides application p
 - **Open source SDK**: Use open-source SDKs for popular platforms that integrate with your CI/CD processes
 - **Exportability and extensibility**: Export data to storage or build custom extensions to customize the monitoring experience
 
+### Key investigation tools:
+
+- **Application dashboard**: An at-a-glance assessment of your application's health and performance
+- **Live metrics**: A real-time analytics dashboard for insight into application activity and performance
+- **Transaction search**: Trace and diagnose transactions to identify issues and optimize performance
+- **Availability view**: Proactively monitor and test the availability and responsiveness of application endpoints
+- **Failures view**: Identify and analyze failures in your application to minimize downtime
+- **Performance view**: Review application performance metrics and potential bottlenecks
+
 ### Key metrics Application Insights collects:
 
 - **Request rates, response times, and failure rates** - Find out which pages are most popular, at what times of day, and where your users are
@@ -25,6 +36,22 @@ Application Insights is an extension of Azure Monitor and provides application p
 - **AJAX calls** from web pages - rates, response times, and failure rates
 - **User and session counts**
 - **Performance counters** from your Windows or Linux server machines, such as CPU, memory, and network usage
+
+### Data Collection, Retention and Storage:
+
+- Data is sent to an Application Insights Log Analytics workspace
+- You can choose the retention period for raw data, from 30 to 730 days
+- Aggregated data is retained for 90 days, and debug snapshots for 15 days
+- Most Application Insights data has a latency of under 5 minutes
+
+### Supported Languages and Platforms:
+
+Application Insights supports various application types and languages:
+
+- **Automatic instrumentation** without code changes for several environments
+- **OpenTelemetry Distro** for ASP.NET Core, .NET, Java, Node.js, and Python
+- **Client-side JavaScript SDK** including support for React, React Native, and Angular
+- **Azure service integration** with Virtual Machines, App Service, Functions, Spring Apps, and Cloud Services
 
 By integrating Application Insights with Power Platform, you gain deep visibility into how your applications are performing and being used, enabling you to make data-driven decisions about improvements and troubleshooting.
 
