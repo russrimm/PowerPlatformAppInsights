@@ -19,8 +19,6 @@ Power Apps now provides built-in Application Insights integration for Model-Driv
 2. **Navigate to "Settings > Properties"**
 3. **Copy the Connection String** (not just the instrumentation key)
 
-   ![Application Insights Connection String](../images/app-insights-connection-string.png)
-
 ### Step 2: Enable Application Insights in Power Platform Admin Center
 
 Unlike Canvas apps which are configured individually, Model-Driven apps use environment-level telemetry settings:
@@ -32,8 +30,6 @@ Unlike Canvas apps which are configured individually, Model-Driven apps use envi
 5. **Enable "Send usage data to Application Insights"**
 6. **Paste your connection string** in the field provided
 7. **Click "Save"**
-
-   ![Admin Center Telemetry Settings](../images/model-admin-telemetry-settings.png)
 
 ### Step 3: Verify Configuration
 

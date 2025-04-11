@@ -28,8 +28,6 @@ This guide covers both methods, starting with the simpler environment-level appr
 2. **Navigate to "Settings > Properties"**
 3. **Copy the Connection String** (not just the instrumentation key)
 
-   ![Application Insights Connection String](../images/app-insights-connection-string.png)
-
 ### Step 2: Enable Application Insights in Power Platform Admin Center
 
 1. **Go to the [Power Platform Admin Center](https://admin.powerplatform.microsoft.com)**
@@ -39,8 +37,6 @@ This guide covers both methods, starting with the simpler environment-level appr
 5. **Toggle "Send usage data to Application Insights" to On**
 6. **Paste your connection string** in the field provided
 7. **Click "Save"**
-
-   ![Admin Center Telemetry Settings](../images/pp-admin-appinsights.png)
 
 ### Step 3: Verify Configuration
 
@@ -187,8 +183,6 @@ While the built-in tracking provides excellent baseline telemetry, you may want 
 5. **Select "Write telemetry" permission**
 6. **Click "Generate key"** 
 7. **Copy and securely store this key** - you won't be able to retrieve it later
-
-   ![Create API Key](../images/create-api-key.png)
 
 ### Step 2: Store Connection Information in Environment Variables
 

@@ -86,8 +86,6 @@ Now, create a wrapper flow for each connector operation you want to monitor:
 
 7. **Return the connector response** to the calling flow
 
-   ![Connector Wrapper Flow](../images/connector-wrapper-flow.png)
-
 ### Step 3: Implement the Error Handling Path
 
 In your wrapper flow's "Catch" scope:
