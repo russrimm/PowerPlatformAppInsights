@@ -1,0 +1,302 @@
+//==========================================================
+// POWER APPS CANVAS APP QUERIES
+//==========================================================
+
+// Query 1: Track Canvas App Screen Navigation Patterns
+// Helps identify the most common user paths through your app
+customEvents
+| where name == "ScreenNavigated"
+| extend appName = tostring(customDimensions.appName)
+| extend screenName = tostring(customDimensions.screenName)
+| extend userId = tostring(customDimensions.userId)
+| summarize screenCount=count() by appName, screenName
+| order by screenCount desc
+
+// Query 2: Canvas App Performance by Screen
+// Identify screens that take longest to load
+customEvents
+| where name == "ScreenLoaded"
+| extend appName = tostring(customDimensions.appName)
+| extend screenName = tostring(customDimensions.screenName)
+| extend loadTime = todouble(customDimensions.loadTime)
+| summarize avgLoadTime=avg(loadTime), p95LoadTime=percentile(loadTime, 95), count() by appName, screenName
+| order by avgLoadTime desc
+
+// Query 3: Most Common Errors in Canvas Apps
+// Identify which errors occur most frequently
+customEvents
+| where name == "AppError"
+| extend appName = tostring(customDimensions.appName)
+| extend screenName = tostring(customDimensions.screenName)
+| extend errorMessage = tostring(customDimensions.errorMessage)
+| summarize errorCount=count() by appName, errorMessage
+| order by errorCount desc
+
+// Query 4: User Activity Heatmap by Hour
+// Shows when your apps are most heavily used
+customEvents
+| where name == "AppOpened" or name == "ScreenNavigated"
+| extend hour = datetime_part("Hour", timestamp)
+| extend dayOfWeek = dayofweek(timestamp)
+| summarize count() by hour, dayOfWeek
+| order by dayOfWeek asc, hour asc
+| render heatmap 
+
+// Query 5: Canvas App Connection Success Rate
+// Track success rate of connections to data sources
+customEvents
+| where name == "DataSourceConnection"
+| extend appName = tostring(customDimensions.appName)
+| extend dataSource = tostring(customDimensions.dataSource)
+| extend success = tobool(customDimensions.success)
+| summarize totalCalls=count(), successfulCalls=countif(success == true) by appName, dataSource
+| extend successRate = (successfulCalls * 100.0) / totalCalls
+| order by totalCalls desc
+
+
+//==========================================================
+// POWER APPS MODEL-DRIVEN APP QUERIES
+//==========================================================
+
+// Query 1: Model-Driven App Form Load Performance
+// Track form load times by entity type
+customEvents
+| where name == "FormLoaded"
+| extend entityName = tostring(customDimensions.entityName)
+| extend formType = tostring(customDimensions.formType)
+| extend loadTime = todouble(customDimensions.loadTime)
+| summarize avgLoadTime=avg(loadTime), p95LoadTime=percentile(loadTime, 95), count() by entityName, formType
+| order by avgLoadTime desc
+
+// Query 2: Model-Driven App Field Changes
+// Track which fields are most frequently modified
+customEvents
+| where name == "FieldChanged"
+| extend entityName = tostring(customDimensions.entityName)
+| extend fieldName = tostring(customDimensions.fieldName)
+| summarize changeCount=count() by entityName, fieldName
+| order by changeCount desc
+
+// Query 3: Business Process Flow Stage Transitions
+// See how users move through your business processes
+customEvents
+| where name == "BPFStageChanged"
+| extend processName = tostring(customDimensions.processName)
+| extend oldStage = tostring(customDimensions.previousStage)
+| extend newStage = tostring(customDimensions.stageName)
+| summarize transitionCount=count() by processName, oldStage, newStage
+| order by processName asc, transitionCount desc
+
+// Query 4: Model-Driven App Ribbon Button Usage
+// Track which ribbon buttons are used most frequently
+customEvents
+| where name == "RibbonButtonClicked"
+| extend entityName = tostring(customDimensions.entityName)
+| extend buttonName = tostring(customDimensions.buttonName)
+| summarize clickCount=count() by entityName, buttonName
+| order by clickCount desc
+
+// Query 5: Form Save Success Rate
+// Track success rate of form saves
+customEvents
+| where name == "FormSave"
+| extend entityName = tostring(customDimensions.entityName)
+| extend success = tobool(customDimensions.success)
+| extend saveMode = tostring(customDimensions.saveMode)
+| summarize totalSaves=count(), successfulSaves=countif(success == true) by entityName, saveMode
+| extend successRate = (successfulSaves * 100.0) / totalSaves
+| order by totalSaves desc
+
+
+//==========================================================
+// POWER AUTOMATE FLOW QUERIES
+//==========================================================
+
+// Query 1: Flow Performance Analysis
+// Analyze execution time and success rate by flow
+customEvents
+| where name == "FlowCompleted" or name == "FlowFailed"
+| extend flowName = tostring(customDimensions.flowName)
+| extend environment = tostring(customDimensions.environment)
+| extend success = name == "FlowCompleted"
+| extend duration = iif(success, todouble(customDimensions.duration), 0)
+| summarize 
+    totalRuns=count(), 
+    successfulRuns=countif(success), 
+    avgDuration=avgif(duration, success), 
+    p95Duration=percentileif(duration, 95, success)
+    by flowName, environment
+| extend successRate = (successfulRuns * 100.0) / totalRuns
+| order by totalRuns desc
+
+// Query 2: Flow Failure Analysis
+// Identify common flow failure reasons
+customEvents
+| where name == "FlowFailed"
+| extend flowName = tostring(customDimensions.flowName)
+| extend errorMessage = tostring(customDimensions.errorMessage)
+| extend errorLocation = tostring(customDimensions.errorLocation)
+| summarize errorCount=count() by flowName, errorMessage, errorLocation
+| order by errorCount desc
+
+// Query 3: Flow Trigger Analysis
+// See which triggers initiate your flows
+customEvents
+| where name == "FlowStarted"
+| extend flowName = tostring(customDimensions.flowName)
+| extend triggerType = tostring(customDimensions.trigger)
+| summarize triggerCount=count() by flowName, triggerType
+| order by triggerCount desc
+
+// Query 4: External System Dependencies
+// Track performance of external system calls
+customEvents
+| where name == "DependencyTrack"
+| extend flowName = tostring(customDimensions.flowName)
+| extend dependencyType = tostring(customDimensions.dependencyType)
+| extend target = tostring(customDimensions.target)
+| extend success = tobool(customDimensions.success)
+| extend duration = todouble(customDimensions.duration)
+| summarize 
+    callCount=count(),
+    successCount=countif(success),
+    avgDuration=avg(duration),
+    p95Duration=percentile(duration, 95)
+    by flowName, dependencyType, target
+| extend successRate = (successCount * 100.0) / callCount
+| order by callCount desc
+
+// Query 5: Flow Usage Trends
+// Track flow execution trends over time
+customEvents
+| where name == "FlowStarted"
+| summarize flowCount=count() by bin(timestamp, 1h)
+| render timechart
+
+
+//==========================================================
+// DATAVERSE SPECIFIC QUERIES
+//==========================================================
+
+// Query 1: Dataverse Operation Performance
+// Track performance of Dataverse operations
+customEvents
+| where name == "DataverseOperation"
+| extend operation = tostring(customDimensions.operation)  // Create, Retrieve, Update, Delete, RetrieveMultiple
+| extend entityName = tostring(customDimensions.entityName)
+| extend duration = todouble(customDimensions.duration)
+| summarize 
+    operationCount=count(),
+    avgDuration=avg(duration),
+    p95Duration=percentile(duration, 95)
+    by operation, entityName
+| order by operationCount desc
+
+// Query 2: Dataverse Query Performance
+// Identify slow queries in your Dataverse environment
+customEvents
+| where name == "DataverseQuery"
+| extend entityName = tostring(customDimensions.entityName)
+| extend queryType = tostring(customDimensions.queryType)
+| extend recordCount = toint(customDimensions.recordCount)
+| extend duration = todouble(customDimensions.duration)
+| summarize 
+    queryCount=count(),
+    avgDuration=avg(duration),
+    p95Duration=percentile(duration, 95),
+    avgRecordCount=avg(recordCount)
+    by entityName, queryType
+| order by p95Duration desc
+
+// Query 3: Dataverse Error Analysis
+// Track and analyze Dataverse errors
+customEvents
+| where name == "DataverseError"
+| extend entityName = tostring(customDimensions.entityName)
+| extend operation = tostring(customDimensions.operation)
+| extend errorCode = tostring(customDimensions.errorCode)
+| extend errorMessage = tostring(customDimensions.errorMessage)
+| summarize errorCount=count() by entityName, operation, errorCode, errorMessage
+| order by errorCount desc
+
+// Query 4: Plugin Performance Analysis
+// Track custom plugin performance in Dataverse
+customEvents
+| where name == "PluginExecution"
+| extend pluginName = tostring(customDimensions.pluginName)
+| extend entityName = tostring(customDimensions.entityName)
+| extend message = tostring(customDimensions.message)
+| extend stage = tostring(customDimensions.stage)
+| extend duration = todouble(customDimensions.duration)
+| extend success = tobool(customDimensions.success)
+| summarize 
+    executionCount=count(),
+    successCount=countif(success),
+    avgDuration=avg(duration),
+    p95Duration=percentile(duration, 95)
+    by pluginName, entityName, message, stage
+| extend successRate = (successCount * 100.0) / executionCount
+| order by avgDuration desc
+
+// Query 5: Dataverse API Usage by Application
+// See which applications are using your Dataverse environment
+customEvents
+| where name == "DataverseOperation"
+| extend appName = tostring(customDimensions.applicationName)
+| extend operation = tostring(customDimensions.operation)
+| extend entityName = tostring(customDimensions.entityName)
+| summarize operationCount=count() by appName, operation, entityName
+| order by operationCount desc
+
+
+//==========================================================
+// CROSS-PLATFORM INTEGRATION QUERIES
+//==========================================================
+
+// Query 1: End-to-End Business Process Performance
+// Track performance across multiple components
+customEvents
+| where timestamp > ago(7d)
+| where name in ("BusinessProcessStarted", "BusinessProcessStep", "BusinessProcessCompleted")
+| extend processName = tostring(customDimensions.processName)
+| extend processId = tostring(customDimensions.processId)
+| extend stepName = tostring(customDimensions.stepName)
+| extend component = tostring(customDimensions.component)  // PowerApp, Flow, CustomConnector, etc.
+| extend duration = todouble(customDimensions.duration)
+| order by processId asc, timestamp asc
+| project timestamp, name, processName, processId, stepName, component, duration
+
+// Query 2: Error Distribution Across Platform Components
+// See which components generate the most errors
+union customEvents, exceptions
+| where timestamp > ago(7d)
+| where name in ("AppError", "FlowFailed", "ConnectorError", "DataverseError", "PluginError")
+| extend component = case(
+    name == "AppError", "PowerApps",
+    name == "FlowFailed", "PowerAutomate",
+    name == "ConnectorError", "Connector",
+    name == "DataverseError" or name == "PluginError", "Dataverse",
+    "Unknown")
+| extend errorType = tostring(customDimensions.errorType)
+| extend errorMessage = tostring(customDimensions.errorMessage)
+| summarize errorCount=count() by component, errorType
+| order by errorCount desc
+
+// Query 3: User Activity Across Platform Components
+// Track how users interact with different components
+customEvents
+| where timestamp > ago(7d)
+| where name in ("AppAction", "FlowTriggered", "DataverseOperation")
+| extend userId = tostring(customDimensions.userId)
+| extend component = case(
+    name == "AppAction", "PowerApps",
+    name == "FlowTriggered", "PowerAutomate",
+    name == "DataverseOperation", "Dataverse",
+    "Unknown")
+| extend action = tostring(iif(
+    name == "AppAction", customDimensions.actionName,
+    name == "FlowTriggered", customDimensions.flowName,
+    name == "DataverseOperation", strcat(customDimensions.operation, " ", customDimensions.entityName),
+    "Unknown"))
+| summarize actionCount=count() by userId, component, action
+| order by userId asc, actionCount desc
