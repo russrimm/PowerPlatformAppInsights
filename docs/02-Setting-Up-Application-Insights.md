@@ -16,7 +16,6 @@
    - **Resource Group**: Create new or select existing
    - **Name**: Enter a unique name (e.g., "PowerPlatformMonitoring")
    - **Region**: Select a region close to your users
-   - **Resource Mode**: Select "Workspace-based"
    - **Log Analytics Workspace**: Create new or select existing
    - Click "Review + create" and then "Create"
 
@@ -34,8 +33,9 @@ Power Platform offers built-in capabilities to continuously export telemetry dat
 Before configuring export, ensure you have:
 
 1. **Admin access** to the Power Platform environment
-2. **An Application Insights resource** (created in the steps above)
-3. **The Application Insights connection string**
+2. **Enable the environment to monitor as a Managed Environment
+3. **An Application Insights resource** (created in the steps above)
+4. **The Application Insights connection string**
 
 ### Step 2: Enable Export in Power Platform Admin Center
 
