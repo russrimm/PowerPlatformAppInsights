@@ -11,8 +11,6 @@
    - Search for "Application Insights" and select it
    - Click "Create"
 
-   ![Create Application Insights](../images/create-app-insights.png)
-
 3. **Configure Application Insights settings**:
    - **Subscription**: Select your Azure subscription
    - **Resource Group**: Create new or select existing
@@ -22,14 +20,10 @@
    - **Log Analytics Workspace**: Create new or select existing
    - Click "Review + create" and then "Create"
 
-   ![Configure Application Insights](../images/configure-app-insights.png)
-
 4. **Access Your Application Insights Resource**:
    - Once deployment is complete, click "Go to resource"
    - Take note of the following information that you'll need later:
      - **Connection String**: Found under "Configure > Properties"
-
-   ![Application Insights Overview](../images/app-insights-overview.png)
 
 ## Configuring Continuous Export from Power Platform
 

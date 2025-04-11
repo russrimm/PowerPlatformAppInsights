@@ -19,8 +19,6 @@ Power Apps provides built-in Application Insights integration for Canvas apps, a
 2. **Navigate to "Settings > Properties"**
 3. **Copy the Connection String** (not just the instrumentation key)
 
-   ![Application Insights Connection String](../images/app-insights-connection-string.png)
-
 ### Step 2: Add the Connection String to Your Canvas App
 
 1. **Open your Canvas app** in the Power Apps maker portal.
