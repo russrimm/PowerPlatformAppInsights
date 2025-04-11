@@ -323,3 +323,124 @@ customEvents
     "Unknown"))
 | summarize actionCount=count() by userId, component, action
 | order by userId asc, actionCount desc
+
+//==========================================================
+// SQL TO KQL TRANSLATION REFERENCE
+//==========================================================
+
+// This section provides guidance on translating common T-SQL queries to KQL format
+// Reference: https://learn.microsoft.com/en-us/kusto/query/sql-cheat-sheet?view=microsoft-fabric
+
+// Basic SELECT statement
+// SQL:  SELECT * FROM Trips
+// KQL:  Trips
+
+// Top N records
+// SQL:  SELECT TOP 10 * FROM Trips
+// KQL:  Trips | take 10
+
+// Filtering with WHERE
+// SQL:  SELECT * FROM Trips WHERE TripDistance > 5
+// KQL:  Trips | where TripDistance > 5
+
+// Column selection
+// SQL:  SELECT TripId, TripDistance FROM Trips
+// KQL:  Trips | project TripId, TripDistance
+
+// Ordering results
+// SQL:  SELECT * FROM Trips ORDER BY TripDistance DESC
+// KQL:  Trips | order by TripDistance desc
+
+// Renaming columns
+// SQL:  SELECT TripId, TripDistance AS Distance FROM Trips
+// KQL:  Trips | project TripId, Distance = TripDistance
+
+// Column calculation
+// SQL:  SELECT TripId, TripDistance * 1.60934 AS DistanceInKm FROM Trips
+// KQL:  Trips | project TripId, DistanceInKm = TripDistance * 1.60934
+
+// JOIN operations
+// SQL:  SELECT t.TripId, d.DriverName FROM Trips t JOIN Drivers d ON t.DriverId = d.DriverId
+// KQL:  Trips | join Drivers on $left.DriverId == $right.DriverId | project TripId, DriverName
+
+// LEFT JOIN operations
+// SQL:  SELECT t.TripId, d.DriverName FROM Trips t LEFT JOIN Drivers d ON t.DriverId = d.DriverId
+// KQL:  Trips | join kind=leftouter Drivers on $left.DriverId == $right.DriverId | project TripId, DriverName
+
+// GROUP BY with COUNT
+// SQL:  SELECT DriverId, COUNT(*) AS TripCount FROM Trips GROUP BY DriverId
+// KQL:  Trips | summarize TripCount = count() by DriverId
+
+// GROUP BY with multiple aggregations
+// SQL:  SELECT DriverId, COUNT(*) AS TripCount, AVG(TripDistance) AS AvgDistance FROM Trips GROUP BY DriverId
+// KQL:  Trips | summarize TripCount = count(), AvgDistance = avg(TripDistance) by DriverId
+
+// HAVING clause
+// SQL:  SELECT DriverId, COUNT(*) AS TripCount FROM Trips GROUP BY DriverId HAVING COUNT(*) > 5
+// KQL:  Trips | summarize TripCount = count() by DriverId | where TripCount > 5
+
+// Subquery
+// SQL:  SELECT * FROM Trips WHERE TripDistance > (SELECT AVG(TripDistance) FROM Trips)
+// KQL:  let avgDistance = toscalar(Trips | summarize avg(TripDistance));
+//       Trips | where TripDistance > avgDistance
+
+// Date functions
+// SQL:  SELECT * FROM Trips WHERE CONVERT(date, StartTime) = '2019-01-01'
+// KQL:  Trips | where startofday(StartTime) == datetime(2019-01-01)
+
+// LIKE operator
+// SQL:  SELECT * FROM Trips WHERE DriverName LIKE '%Smith%'
+// KQL:  Trips | where DriverName has "Smith"
+
+// IN operator
+// SQL:  SELECT * FROM Trips WHERE DriverId IN (1, 2, 3)
+// KQL:  Trips | where DriverId in (1, 2, 3)
+
+// CASE statement
+// SQL:  SELECT TripId, CASE WHEN TripDistance < 5 THEN 'Short' WHEN TripDistance < 10 THEN 'Medium' ELSE 'Long' END AS TripCategory FROM Trips
+// KQL:  Trips | extend TripCategory = case(TripDistance < 5, "Short", TripDistance < 10, "Medium", "Long") | project TripId, TripCategory
+
+// Common Table Expressions (CTE)
+// SQL:  WITH LongTrips AS (SELECT * FROM Trips WHERE TripDistance > 10) SELECT * FROM LongTrips WHERE PassengerCount > 2
+// KQL:  let LongTrips = Trips | where TripDistance > 10;
+//       LongTrips | where PassengerCount > 2
+
+// DISTINCT values
+// SQL:  SELECT DISTINCT DriverId FROM Trips
+// KQL:  Trips | distinct DriverId
+
+// UNION
+// SQL:  SELECT * FROM Trips2020 UNION SELECT * FROM Trips2021
+// KQL:  Trips2020 | union Trips2021
+
+// UNION ALL
+// SQL:  SELECT * FROM Trips2020 UNION ALL SELECT * FROM Trips2021
+// KQL:  Trips2020 | union kind=outer Trips2021
+
+// Time-windowing (equivalent of SQL window functions)
+// SQL:  SELECT TripId, TripDistance, AVG(TripDistance) OVER (PARTITION BY DriverId) AS AvgDriverDistance FROM Trips
+// KQL:  Trips | extend AvgDriverDistance = avg(TripDistance) by DriverId | project TripId, TripDistance, AvgDriverDistance
+
+// Common KQL Operators with no direct SQL equivalent
+
+// Parse JSON data
+// KQL:  Traces | extend parsedData = parse_json(Properties) | project parsedData.key
+
+// Time-based bins for visualization
+// KQL:  Trips | summarize count() by bin(StartTime, 1h) | render timechart
+
+// Dynamic columns
+// KQL:  customEvents | extend props = bag_pack("key1", val1, "key2", val2)
+
+// String operations
+// KQL:  Traces | where Message startswith "Error:" | extend ErrorCode = extract("Code: ([0-9]+)", 1, Message)
+
+// Best Practices for KQL Performance
+// 1. Filter early to reduce processed data volume
+// 2. Use the 'project' operator to select only needed columns
+// 3. Avoid using 'distinct' on high-cardinality columns
+// 4. Prefer 'summarize' over 'distinct' when appropriate
+// 5. Use 'let' statements to avoid repetitive computations
+// 6. Consider time filtering first in Application Insights queries
+// 7. For joining large tables, place the smaller table on the right side
+// 8. Use materialized views for frequently used complex queries

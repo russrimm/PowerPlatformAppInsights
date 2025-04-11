@@ -1,6 +1,32 @@
 # Setting Up Microsoft Application Insights
 
-This guide will walk you through the process of setting up Microsoft Application Insights for use with Power Platform applications.
+## What is Application Insights?
+
+Application Insights is an extension of Azure Monitor and provides application performance monitoring (APM) features. It's a service that monitors your live applications, automatically detects performance anomalies, and includes powerful analytics tools to help you diagnose issues and understand what users actually do with your apps.
+
+### Key capabilities of Application Insights:
+
+- **Live metrics and real-time monitoring**: Observe your application's live metrics in real-time with sub-second latency to help diagnose issues as they happen
+- **Distributed tracing**: Track requests and dependencies across application components, helping you identify performance bottlenecks and failure points
+- **Application Map**: Visual representation showing the topology of your application, making it easier to identify performance bottlenecks or failure hotspots
+- **Availability monitoring**: Set up web tests to continuously test your application's availability and responsiveness from various locations globally
+- **Usage analysis**: Understand user behavior, including which features are most popular and how users navigate your application
+- **Smart detection and alerts**: Automatically detect performance anomalies and failures with built-in machine learning capabilities
+- **Integration with DevOps tools**: Seamlessly integrate with Azure DevOps, GitHub, Power Platform, and other development tools
+- **Open source SDK**: Use open-source SDKs for popular platforms that integrate with your CI/CD processes
+- **Exportability and extensibility**: Export data to storage or build custom extensions to customize the monitoring experience
+
+### Key metrics Application Insights collects:
+
+- **Request rates, response times, and failure rates** - Find out which pages are most popular, at what times of day, and where your users are
+- **Dependency rates, response times, and failure rates** - Determine if external services are slowing you down
+- **Exceptions** - Analyze the aggregated statistics, or pick specific instances and drill into the stack trace and related requests
+- **Page views and load performance** - Reported by your users' browsers
+- **AJAX calls** from web pages - rates, response times, and failure rates
+- **User and session counts**
+- **Performance counters** from your Windows or Linux server machines, such as CPU, memory, and network usage
+
+By integrating Application Insights with Power Platform, you gain deep visibility into how your applications are performing and being used, enabling you to make data-driven decisions about improvements and troubleshooting.
 
 ## Creating an Application Insights Resource
 
