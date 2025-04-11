@@ -18,17 +18,17 @@ This document provides a list of all screenshots referenced in the training mate
 
 ## 03-Canvas-App-Integration.md
 
-1. **canvas-environment-variable.png**
-   - Screenshot of the Power Apps maker portal showing the environment variables section
-   - Should show the creation/configuration of an AppInsightsKey variable
+1. **app-insights-connection-string.png**
+   - Screenshot of the Application Insights Properties page in Azure Portal
+   - Should highlight the Connection String field that needs to be copied
 
-2. **html-component-config.png** (not explicitly referenced, but useful to add)
-   - Screenshot showing how to configure the HTML component in a Canvas app
-   - Should display the properties panel with the HTMLText property
+2. **canvas-telemetry-settings.png**
+   - Screenshot of the Power Apps maker portal showing the Monitor settings for a Canvas app
+   - Should show the toggle for "Send app telemetry to Application Insights" and the connection string field
 
-3. **canvas-app-functions.png** (not explicitly referenced, but useful to add)
-   - Screenshot showing the Power Fx formula editor with App Insights tracking functions
-   - Should display sample tracking function code
+3. **canvas-trace-example.png** (not explicitly referenced, but useful to add)
+   - Screenshot showing the Power Fx formula editor with a Trace function example
+   - Should display example of custom telemetry using the Trace function
 
 ## 04-Model-Driven-App-Integration.md
 
@@ -119,6 +119,10 @@ This document provides a list of all screenshots referenced in the training mate
 4. **app-insights-failures.png**
    - Screenshot of the Application Insights Failures section
    - Should show error breakdown and analysis options
+
+5. **powerapp-telemetry-results.png**
+   - Screenshot showing Application Insights query results with Power Apps telemetry
+   - Should show actual telemetry data from a Canvas app with the standard schema
 
 ## Instructions for Creating Screenshots
 

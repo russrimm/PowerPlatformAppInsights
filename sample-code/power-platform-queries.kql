@@ -2,57 +2,80 @@
 // POWER APPS CANVAS APP QUERIES
 //==========================================================
 
-// Query 1: Track Canvas App Screen Navigation Patterns
+// Query 1: Track Canvas App Usage
+// Helps identify how often your apps are being used
+customEvents
+| where cloud_RoleName == "PowerApps"
+| where name == "AppLaunch" 
+| extend appName = tostring(customDimensions.appName)
+| extend userId = tostring(customDimensions.userId)
+| summarize LaunchCount=count() by appName, userId, bin(timestamp, 1d)
+| order by timestamp desc, LaunchCount desc
+
+// Query 2: Canvas App Screen Navigation Patterns
 // Helps identify the most common user paths through your app
 customEvents
-| where name == "ScreenNavigated"
+| where cloud_RoleName == "PowerApps"
+| where name == "ScreenView" 
 | extend appName = tostring(customDimensions.appName)
 | extend screenName = tostring(customDimensions.screenName)
-| extend userId = tostring(customDimensions.userId)
-| summarize screenCount=count() by appName, screenName
-| order by screenCount desc
+| summarize screenViewCount=count() by appName, screenName
+| order by screenViewCount desc
 
-// Query 2: Canvas App Performance by Screen
+// Query 3: Canvas App Performance by Screen
 // Identify screens that take longest to load
 customEvents
-| where name == "ScreenLoaded"
+| where cloud_RoleName == "PowerApps"
+| where name == "ScreenView" 
 | extend appName = tostring(customDimensions.appName)
 | extend screenName = tostring(customDimensions.screenName)
 | extend loadTime = todouble(customDimensions.loadTime)
 | summarize avgLoadTime=avg(loadTime), p95LoadTime=percentile(loadTime, 95), count() by appName, screenName
 | order by avgLoadTime desc
 
-// Query 3: Most Common Errors in Canvas Apps
+// Query 4: Most Common Errors in Canvas Apps
 // Identify which errors occur most frequently
-customEvents
-| where name == "AppError"
+exceptions
+| where cloud_RoleName == "PowerApps"
 | extend appName = tostring(customDimensions.appName)
 | extend screenName = tostring(customDimensions.screenName)
 | extend errorMessage = tostring(customDimensions.errorMessage)
-| summarize errorCount=count() by appName, errorMessage
+| summarize errorCount=count() by appName, screenName, errorMessage
 | order by errorCount desc
 
-// Query 4: User Activity Heatmap by Hour
+// Query 5: User Activity Heatmap by Hour
 // Shows when your apps are most heavily used
 customEvents
-| where name == "AppOpened" or name == "ScreenNavigated"
+| where cloud_RoleName == "PowerApps"
+| where name in ("AppLaunch", "ScreenView")
 | extend hour = datetime_part("Hour", timestamp)
 | extend dayOfWeek = dayofweek(timestamp)
 | summarize count() by hour, dayOfWeek
 | order by dayOfWeek asc, hour asc
 | render heatmap 
 
-// Query 5: Canvas App Connection Success Rate
-// Track success rate of connections to data sources
+// Query 6: Custom Trace Events Analysis
+// Track custom business events in your app
 customEvents
-| where name == "DataSourceConnection"
+| where cloud_RoleName == "PowerApps"
+| where name startswith "Trace:"
+| extend traceType = substring(name, 6)
 | extend appName = tostring(customDimensions.appName)
-| extend dataSource = tostring(customDimensions.dataSource)
-| extend success = tobool(customDimensions.success)
-| summarize totalCalls=count(), successfulCalls=countif(success == true) by appName, dataSource
-| extend successRate = (successfulCalls * 100.0) / totalCalls
-| order by totalCalls desc
+| extend severity = tostring(customDimensions.severityLevel)
+| extend additionalProperties = customDimensions
+| summarize count() by appName, traceType, severity
+| order by count_ desc
 
+// Query 7: Session Analysis
+// Understand user session length and engagement
+customEvents
+| where cloud_RoleName == "PowerApps"
+| where name in ("AppLaunch", "AppExit") 
+| extend appName = tostring(customDimensions.appName)
+| extend userId = tostring(customDimensions.userId)
+| extend sessionId = tostring(customDimensions.sessionId)
+| order by sessionId, timestamp asc
+| project timestamp, name, appName, userId, sessionId
 
 //==========================================================
 // POWER APPS MODEL-DRIVEN APP QUERIES

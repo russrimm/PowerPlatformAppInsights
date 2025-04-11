@@ -4,313 +4,188 @@ This guide demonstrates how to integrate Azure Application Insights with a Power
 
 ## Overview
 
-Canvas apps don't natively integrate with Application Insights, but we can use custom code components and JavaScript to send telemetry data. This guide will show you how to:
+Power Apps provides built-in Application Insights integration for Canvas apps, allowing you to easily track telemetry without writing custom code. This guide will show you how to:
 
 1. Set up a Canvas app with Application Insights integration
-2. Track custom events and metrics
-3. Capture and log errors
-4. Monitor user behavior and performance
+2. Configure telemetry settings
+3. Review tracked telemetry data
+4. Implement custom tracking for specific scenarios (optional)
 
 ## Adding Application Insights to a Canvas App
 
-### Step 1: Store the Instrumentation Key
+### Step 1: Get Your Application Insights Connection String
 
-1. **Create an environment variable** to store your Application Insights instrumentation key:
-   - In the [Power Apps maker portal](https://make.powerapps.com), go to your environment
-   - Navigate to "Environment Variables" under "Settings"
-   - Create a new environment variable (e.g., "AppInsightsKey")
-   - Set the data type to "Text" and enter your instrumentation key as the default value
+1. **In the Azure Portal**, go to your Application Insights resource
+2. **Navigate to "Settings > Properties"**
+3. **Copy the Connection String** (not just the instrumentation key)
 
-   ![Environment Variable](../images/canvas-environment-variable.png)
+   ![Application Insights Connection String](../images/app-insights-connection-string.png)
 
-### Step 2: Add Required Components
+### Step 2: Add the Connection String to Your Canvas App
 
-1. **Add a HTML text component** to your Canvas app:
-   - Insert a HTML component from the "Insert" menu
-   - Place it somewhere inconspicuous (you can make it 1px by 1px and hide it)
-   - This will be used to load the Application Insights JavaScript SDK
+1. **Open your Canvas app** in the Power Apps maker portal
+2. **Go to Settings** (gear icon) > **Advanced settings**
+3. **In the left navigation**, select **Monitor**
+4. **Enable "Send app telemetry to Application Insights"**
+5. **Paste your connection string** in the field provided
+6. **Click "Save"**
 
-2. **Create a global variable** to reference your Application Insights instrumentation key:
-   - Navigate to the "App" object in the Tree view
-   - Set an OnStart property to initialize a global variable:
+   ![Canvas App Telemetry Settings](../images/canvas-telemetry-settings.png)
 
-   ```
-   Set(
-       gblAppInsightsKey,
-       EnvironmentVariables.AppInsightsKey
-   );
-   ```
+### Step 3: Configure Telemetry Options
 
-### Step 3: Load the Application Insights JavaScript SDK
+In the same Monitor settings panel, you can configure:
 
-1. **Configure the HTML component** to load the Application Insights JavaScript SDK:
-   - Select the HTML component
-   - Set its HTMLText property to:
+1. **Session logging level** (choose from Error, Warning, or Information)
+2. **Control-level error logging** (enable/disable tracking of control-level errors)
 
-   ```html
-   <script type="text/javascript">
-   var sdkLoaded = false;
-   
-   function loadAppInsights() {
-       if (sdkLoaded) return;
-       
-       var script = document.createElement("script");
-       script.src = "https://js.monitor.azure.com/scripts/b/ai.2.min.js";
-       script.onload = function() {
-           initAppInsights();
-       };
-       document.head.appendChild(script);
-       sdkLoaded = true;
-   }
-   
-   function initAppInsights() {
-       // Create the SDK instance
-       var instrumentationKey = window.parent.appInsightsKey;
-       window.appInsights = new Microsoft.ApplicationInsights.ApplicationInsights({
-           config: {
-               instrumentationKey: instrumentationKey,
-               enableCorsCorrelation: true,
-               enableRequestHeaderTracking: true,
-               enableResponseHeaderTracking: true
-           }
-       });
-       
-       // Send an initial trace message to verify setup
-       window.appInsights.trackTrace({message: "App Insights initialized in Power App"});
-       window.appInsights.flush();
-   }
-   
-   // Expose functions to Power Apps
-   window.trackEvent = function(eventName, properties) {
-       if (!window.appInsights) return;
-       window.appInsights.trackEvent({name: eventName, properties: properties});
-       window.appInsights.flush();
-   };
-   
-   window.trackException = function(error, properties) {
-       if (!window.appInsights) return;
-       window.appInsights.trackException({exception: new Error(error), properties: properties});
-       window.appInsights.flush();
-   };
-   
-   window.trackTrace = function(message, severity, properties) {
-       if (!window.appInsights) return;
-       window.appInsights.trackTrace({message: message, severity: severity, properties: properties});
-       window.appInsights.flush();
-   };
-   
-   // Initialize on load
-   loadAppInsights();
-   </script>
-   ```
+These settings help you balance detail against data volume.
 
-2. **Pass the instrumentation key** to the HTML component:
-   - Add an App OnStart property to make the key available to the JavaScript:
+## What Gets Tracked Automatically
 
-   ```
-   Set(
-       gblAppInsightsKey, 
-       EnvironmentVariables.AppInsightsKey
-   );
-   
-   // Make key available to HTML component
-   UpdateContext({
-       appInsightsKey: gblAppInsightsKey
-   });
-   ```
+Once you've configured Application Insights integration, the following telemetry is automatically tracked:
 
-### Step 4: Create Helper Functions for Tracking
+### Automatic Events
 
-1. **Create a collection of Power Fx functions** to make it easier to track events:
-   - Add a new screen for your helper functions or use an existing one
-   - Create the following functions using the Power Fx formula bar:
+- **App Start/End**: When users open and close your app
+- **Screen Navigation**: When users navigate between screens
+- **Error Events**: Any unhandled errors or exceptions
+- **Performance Metrics**: Load times and responsiveness metrics
 
-2. **TrackEvent function**:
-   ```
-   Set(
-       TrackEvent,
-       With(
-           {
-               eventName: eventName,
-               properties: properties
-           },
-           Html1.PostMessage(
-               JSON(
-                   {
-                       functionName: "trackEvent",
-                       eventName: eventName,
-                       properties: properties
-                   }
-               ),
-               "*"
-           )
-       )
-   )
-   ```
+### Automatic Properties
 
-3. **TrackError function**:
-   ```
-   Set(
-       TrackError,
-       With(
-           {
-               errorMessage: errorMessage,
-               properties: properties
-           },
-           Html1.PostMessage(
-               JSON(
-                   {
-                       functionName: "trackException",
-                       error: errorMessage,
-                       properties: properties
-                   }
-               ),
-               "*"
-           )
-       )
-   )
-   ```
+Each event includes helpful context like:
 
-4. **TrackTrace function**:
-   ```
-   Set(
-       TrackTrace,
-       With(
-           {
-               message: message,
-               severity: severity,
-               properties: properties
-           },
-           Html1.PostMessage(
-               JSON(
-                   {
-                       functionName: "trackTrace",
-                       message: message,
-                       severity: severity,
-                       properties: properties
-                   }
-               ),
-               "*"
-           )
-       )
-   )
-   ```
+- **User ID**: The ID of the user using the app
+- **Session ID**: Unique identifier for the user's session
+- **App Name**: The name of your canvas app
+- **App Version**: The version of your canvas app
+- **Environment**: The environment where the app is running
 
-## Implementing Tracking in Your App
+## Viewing Your Canvas App Telemetry in Application Insights
 
-Now that you have set up the infrastructure, you can track various activities in your Canvas app:
-
-### Track Button Clicks
-
-```
-Button.OnSelect = 
-    TrackEvent(
-        "ButtonClicked", 
-        {
-            "screenName": "HomeScreen",
-            "buttonName": "SubmitButton",
-            "userId": User().Email
-        }
-    );
-    // Rest of your button logic
-```
-
-### Track Screen Navigation
-
-```
-Screen.OnVisible = 
-    TrackEvent(
-        "ScreenNavigated", 
-        {
-            "screenName": "DetailsScreen",
-            "previousScreen": Navigate.PreviousScreen.Name,
-            "timestamp": Text(Now())
-        }
-    );
-```
-
-### Track Form Submissions
-
-```
-SubmitForm(
-    Form1
-);
-If(
-    Form1.ErrorKind = ErrorKind.None,
-    TrackEvent(
-        "FormSubmitted", 
-        {
-            "formName": "CustomerForm",
-            "recordId": Form1.LastSubmitResult.id
-        }
-    ),
-    TrackError(
-        "Form Submission Failed", 
-        {
-            "formName": "CustomerForm",
-            "errorMessage": Form1.Error
-        }
-    )
-)
-```
-
-### Implement Error Handling
-
-```
-If(
-    IsError(YourOperationHere),
-    TrackError(
-        "Operation Failed", 
-        {
-            "operationType": "DataRetrieval",
-            "errorDetails": Text(Error)
-        }
-    ),
-    // Success handling code
-)
-```
-
-## Viewing Your Application Insights Data
-
-After implementing tracking in your Canvas app:
+After implementing Application Insights in your Canvas app:
 
 1. **Go to the Azure Portal** and navigate to your Application Insights resource
-2. **Check "Live Metrics"** to see real-time telemetry as you test your app
+2. **Check "Live Metrics"** to see real-time telemetry as users interact with your app
 3. **Use "Logs"** to query specific events and create custom analytics
-4. **View "Application Map"** to understand the end-to-end flow of your application
 
-## Sample Queries for Analysis
+## Sample Queries for Canvas App Analysis
 
 Here are some useful Kusto queries you can run in the "Logs" section of Application Insights:
 
-### Top Button Clicks
+### App Usage Analysis
 
 ```kusto
 customEvents
-| where name == "ButtonClicked" 
-| summarize count() by tostring(customDimensions.buttonName)
-| order by count_ desc
+| where cloud_RoleName == "PowerApps"
+| where name == "AppLaunch" 
+| summarize LaunchCount=count() by bin(timestamp, 1d)
+| render timechart
 ```
 
-### Screen Navigation Patterns
+### Screen Navigation Analysis
 
 ```kusto
 customEvents
-| where name == "ScreenNavigated" 
-| project timestamp, 
-    screenName = tostring(customDimensions.screenName), 
-    previousScreen = tostring(customDimensions.previousScreen)
-| order by timestamp desc
+| where cloud_RoleName == "PowerApps"
+| where name == "ScreenView" 
+| extend screenName = tostring(customDimensions.screenName)
+| summarize ViewCount=count() by screenName
+| order by ViewCount desc
 ```
 
 ### Error Analysis
 
 ```kusto
 exceptions
-| where timestamp > ago(7d)
-| summarize count() by outerMessage
-| top 10 by count_ desc
+| where cloud_RoleName == "PowerApps"
+| extend appName = tostring(customDimensions.appName)
+| extend screenName = tostring(customDimensions.screenName)
+| extend errorType = tostring(customDimensions.errorType)
+| summarize ErrorCount=count() by appName, screenName, errorType
+| order by ErrorCount desc
 ```
+
+### Performance Analysis
+
+```kusto
+customEvents
+| where cloud_RoleName == "PowerApps"
+| where name == "ScreenView" 
+| extend screenName = tostring(customDimensions.screenName)
+| extend loadTime = todouble(customDimensions.loadTime)
+| summarize avgLoadTime=avg(loadTime), p95LoadTime=percentile(loadTime, 95) by screenName
+| order by avgLoadTime desc
+```
+
+## Optional: Implementing Custom Tracking
+
+While the built-in tracking covers most scenarios, you can add custom tracking using Power Fx formulas to capture specific business events.
+
+### Using the Trace Function for Custom Logging
+
+The `Trace` function allows you to send custom events to Application Insights:
+
+```
+Trace(
+    "BusinessEvent",            // Event name
+    TraceSeverity.Information,  // Severity level
+    {
+        EventCategory: "OrderProcessing",  // Custom property
+        OrderAmount: Text(OrderTotal),     // Custom property
+        CustomerType: CustomerSegment      // Custom property
+    }
+)
+```
+
+### Adding Custom Tracking to Button Click
+
+```
+Button1.OnSelect = 
+If(
+    !IsBlank(TextInput1.Text),
+    Trace(
+        "OrderSubmitted", 
+        TraceSeverity.Information,
+        {
+            OrderId: OrderID,
+            Amount: OrderAmount,
+            Items: CountItems
+        }
+    );
+    // Rest of your button logic
+)
+```
+
+### Using Trace for Error Handling
+
+```
+Button1.OnSelect = 
+If(
+    IsError(
+        Set(Result, YourFunctionThatMightFail())
+    ),
+    Trace(
+        "BusinessOperationFailed",
+        TraceSeverity.Error,
+        {
+            OperationType: "OrderSubmission",
+            ErrorDetails: Text(Error)
+        }
+    ),
+    // Success path
+)
+```
+
+## Best Practices for Canvas App Telemetry
+
+1. **Start with the default settings** and adjust based on your monitoring needs
+2. **Use Information level** for development/debugging, then switch to Warning or Error for production
+3. **Set up alerts** for critical errors in your application
+4. **Review telemetry regularly** to identify patterns and improvement opportunities
+5. **Add custom Trace events** only for important business processes to avoid excess data
+6. **Consider data privacy** - don't log personally identifiable information (PII) unless necessary
 
 ## Next Steps
 
@@ -318,6 +193,6 @@ Now that you've set up Application Insights tracking in your Canvas app, proceed
 
 ## Documentation References
 
-- [Application Insights JavaScript SDK](https://docs.microsoft.com/en-us/azure/azure-monitor/app/javascript)
-- [Power Apps Canvas Apps Development](https://docs.microsoft.com/en-us/powerapps/maker/canvas-apps/)
+- [Power Platform integration with Application Insights](https://learn.microsoft.com/en-us/power-platform/admin/overview-integration-application-insights)
+- [Monitor canvas apps with Application Insights](https://learn.microsoft.com/en-us/power-platform/admin/monitor-canvas-apps)
 - [Azure Monitor Log Queries](https://docs.microsoft.com/en-us/azure/azure-monitor/logs/log-query-overview)
