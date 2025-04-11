@@ -82,7 +82,6 @@ By integrating Application Insights with Power Platform, you gain deep visibilit
 4. **Access Your Application Insights Resource**:
    - Once deployment is complete, click "Go to resource"
    - Take note of the following information that you'll need later:
-     - **Instrumentation Key**: Found under "Configure > Properties"
      - **Connection String**: Found under "Configure > Properties"
 
    ![Application Insights Overview](../images/app-insights-overview.png)
@@ -101,36 +100,32 @@ Before configuring export, ensure you have:
 
 ### Step 2: Enable Export in Power Platform Admin Center
 
-1. **Go to the [Power Platform Admin Center](https://admin.powerplatform.microsoft.com)**
-2. **Select your environment** from the Environments list
-3. **Navigate to Settings**
-4. **Under Product > Privacy + optimization**, find the **Usage and error reporting** section
-5. **Toggle "Send usage data to Application Insights" to On**
-6. **Enter your Application Insights connection string** in the field provided
-7. **Click "Save"**
-
-   ![Enable App Insights Export](../images/pp-admin-appinsights.png)
+1. **Go to the [Power Platform Admin Center](https://admin.powerplatform.microsoft.com)**.
+2. **Select "Data export"** in the navigation pane.
+3. **Go to the "App Insights" tab** and select "New data export".
+4. **Provide a friendly name** for the export package to identify the Azure Application Insights instance.
+5. **Select the specific data types** to export, such as:
+   - Dataverse diagnostics and performance
+   - Power Automate (e.g., cloud flow runs, triggers, actions)
+6. **Apply filters** to view specific, filtered data (optional).
+7. **Select the environment** to export data from and the Azure subscription, resource group, and Application Insights environment to export data to.
+8. **Review the details** and select "Create" to set up the data export connection.
 
 ### Step 3: Configure Export Scope
 
-In the same settings page, you can configure which products to include in the export:
-
-1. **Select which products** to monitor:
-   - **Power Apps**: Usage and errors from canvas and model-driven apps
-   - **Power Automate**: Cloud flow execution data
-   - **Dataverse**: Entity operation telemetry
-   - **Custom Connectors**: Usage and performance data
-
+1. **Select the data types** to monitor, such as:
+   - Power Apps: Usage and errors from canvas and model-driven apps
+   - Power Automate: Cloud flow execution data
+   - Dataverse diagnostics and performance: Entity operation telemetry
+   - Dynamics Customer Service: Usage and performance data for Dynamics
 2. **Configure sampling rate** (optional):
-   - Default is 100% (all telemetry)
-   - Can be reduced to handle high-volume environments
+   - Default is 100% (all telemetry).
+   - Can be reduced to handle high-volume environments.
 
 ### Step 4: Verify Data Export
 
-After configuring export, verify that data is flowing to Application Insights:
-
-1. **Wait 15-30 minutes** for the first data to be exported
-2. **Open your Application Insights resource** in Azure Portal
+1. **Wait up to 24 hours** for the first data to be exported.
+2. **Open your Application Insights resource** in Azure Portal.
 3. **Navigate to Logs** and run a simple query:
 
 ```kusto
@@ -139,7 +134,7 @@ customEvents
 | take 10
 ```
 
-4. **Check for data** from the Power Platform environment
+4. **Check for data** from the Power Platform environment.
 
 ### Step 5: Set Up Data Retention (Optional)
 
