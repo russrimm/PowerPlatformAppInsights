@@ -32,9 +32,9 @@ Before starting this training, ensure you have the following prerequisites in pl
 ## Environment Setup Checklist
 
 - [ ] Verify Power Platform access and permissions
-- [ ] Confirm Azure subscription access
-- [ ] Create a development environment in Power Platform
-- [ ] Install recommended browser extensions (optional)
+- [ ] Confirm Azure subscription access to create and use Application Insights
+- [ ] Choose one or more environments to monitor with Application Insights
+- [ ] Enable the environment to monitor with Application Insights as a managed environment
 
 ## Next Steps
 
