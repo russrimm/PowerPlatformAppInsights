@@ -57,19 +57,17 @@ Before configuring export, ensure you have:
    - Power Automate: Cloud flow execution data
    - Dataverse diagnostics and performance: Entity operation telemetry
    - Dynamics Customer Service: Usage and performance data for Dynamics
-2. **Configure sampling rate** (optional):
-   - Default is 100% (all telemetry).
-   - Can be reduced to handle high-volume environments.
 
 ### Step 4: Verify Data Export
 
-1. **Wait up to 24 hours** for the first data to be exported.
+1. **Wait a couple of hours** for the first data to be exported.
 2. **Open your Application Insights resource** in Azure Portal.
 3. **Navigate to Logs** and run a simple query:
 
 ```kusto
-customEvents
-| where cloud_RoleName startswith "PowerPlatform"
+dependencies
+| where duration > 400
+| sort by duration 
 | take 10
 ```
 
