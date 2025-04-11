@@ -2,7 +2,7 @@
 
 ## Training Guide
 
-This repository contains a comprehensive training guide on integrating Power Platform solutions with Microsoft Application Insights. This guide is designed to help you understand how to monitor, track, and gain insights into your Power Platform applications using Azure Application Insights.
+This repository contains a comprehensive guide on integrating Power Platform solutions with Microsoft Application Insights. It is designed to help understand how to monitor, track, and gain insights into Power Platform applications using Azure Application Insights.
 
 ## Table of Contents
 
