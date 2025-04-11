@@ -101,19 +101,46 @@ customEvents
 | order by timestamp desc
 ```
 
-### Flow Error Analysis
+### Failed Cloud Flows
 
 ```kusto
-customEvents
-| where cloud_RoleName == "PowerAutomate"
-| where name == "Microsoft.Flow.Run.Failed"
-| extend flowName = tostring(customDimensions.flowDisplayName)
-| extend flowId = tostring(customDimensions.flowId)
-| extend errorMessage = tostring(customDimensions.errorMessage)
-| extend errorCode = tostring(customDimensions.errorCode)
-| extend runId = tostring(customDimensions.runId)
-| summarize errorCount = count() by flowName, errorMessage
-| order by errorCount desc
+dependencies 
+| where success == false
+| extend error = todynamic(tostring(customDimensions.error))
+| extend tags = todynamic(tostring(customDimensions.tags))
+| project 
+    timestamp, 
+    target, 
+    operation_Id, 
+    operation_ParentId, 
+    name, 
+    error.code, 
+    error.message, 
+    customDimensions.signalCategory,
+    tags.capabilities,
+    tags.environmentName,
+    directlink=strcat("https://make.powerautomate.com/environments/", tags.environmentName, "/flows/",  target, "/runs/", operation_ParentId)
+```
+
+### Cloud Flows in use
+
+```kusto
+requests
+| where timestamp > ago(1h)
+| extend requestData = todynamic(tostring(customDimensions.Data))
+| join kind=leftouter (dependencies | where type == "Cloud Flow/Cloud flow triggers" | project TriggerName = name, target) on $left.name == $right.target
+| summarize FlowDisplayNameRuns = count() by tostring(requestData.FlowDisplayName), TriggerName, tostring(requestData.FlowDisplayName), tostring(requestData.tags.createdBy)
+| project TriggerName,  tostring(requestData_FlowDisplayName), FlowDisplayNameRuns, requestData_tags_createdBy
+```
+
+### Cloud Flow runs with direct link to flow runs
+
+```kusto
+requests 
+| where customDimensions.resourceProvider == 'Cloud Flow'
+| extend data = todynamic(tostring(customDimensions.Data))
+| project timestamp, operation_Id,  operation_ParentId, success, duration, customDimensions.signalCategory, name, data.FlowDisplayName, data.tags.xrmWorkflowId , data.tags.createdBy, 
+data, customDimensions, directlink=strcat("https://make.powerautomate.com/environments/", data.tags.environmentName, "/flows/",  name, "/runs/", operation_Id)
 ```
 
 ### Flow Performance Analysis
@@ -133,22 +160,18 @@ customEvents
 | order by avgDuration desc
 ```
 
-### Action Performance Analysis
+### Summary of flow runs
 
 ```kusto
-customEvents
-| where cloud_RoleName == "PowerAutomate"
-| where name == "Microsoft.Flow.Action.Completed"
-| extend flowName = tostring(customDimensions.flowDisplayName)
-| extend actionName = tostring(customDimensions.operationName)
-| extend duration = todouble(customDimensions.duration)
-| summarize
-    avgDuration = avg(duration),
-    p95Duration = percentile(duration, 95),
-    maxDuration = max(duration),
-    executions = count()
-    by flowName, actionName
-| order by avgDuration desc
+requests
+| extend cd = parse_json(customDimensions)
+| where cd.resourceProvider has "Cloud Flow"
+| extend data = parse_json(tostring(cd.Data))
+| extend FlowName = tostring(data.FlowDisplayName)
+|summarize nRun = count(), nFailed = countif(success==false) by FlowName
+| extend nSuccess = nRun-toint(nFailed)
+| project FlowName, nRun,nSuccess,nFailed
+| order by toint(nRun) desc
 ```
 
 ## Method 2: Custom Telemetry Tracking
