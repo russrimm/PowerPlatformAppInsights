@@ -17,6 +17,7 @@ Before starting this training, ensure you have the following prerequisites in pl
 1. **Power Platform Tools**:
    - Access to [Power Apps Maker Portal](https://make.powerapps.com)
    - Access to [Power Automate Portal](https://flow.microsoft.com)
+   - Power Platform Admin Access to [Power Platform Administration Center](https://aka.ms/ppac)
 
 2. **Development Tools**:
    - Web browser (Microsoft Edge or Google Chrome recommended)
