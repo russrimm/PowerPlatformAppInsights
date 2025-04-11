@@ -33,9 +33,9 @@ Power Platform offers built-in capabilities to continuously export telemetry dat
 Before configuring export, ensure you have:
 
 1. **Admin access** to the Power Platform environment
-2. **Enable the environment to monitor as a Managed Environment
+2. **Managed Environment** Enable the environment(s) to be monitored as Managed Environment(s)
 3. **An Application Insights resource** (created in the steps above)
-4. **The Application Insights connection string**
+4. **The Application Insights connection string** From the **Overview** Pane of the App Insights Resource
 
 ### Step 2: Enable Export in Power Platform Admin Center
 
