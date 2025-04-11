@@ -23,16 +23,17 @@ Power Apps provides built-in Application Insights integration for Canvas apps, a
 
 ### Step 2: Add the Connection String to Your Canvas App
 
-1. **Open your Canvas app** in the Power Apps maker portal
-2. **Go to Settings** (gear icon) > **Advanced settings**
-3. **In the left navigation**, select **Monitor**
-4. **Enable "Send app telemetry to Application Insights"**
-5. **Paste your connection string** in the field provided
-6. **Click "Save"**
+1. **Open your Canvas app** in the Power Apps maker portal.
+2. **Select the App object** in the left navigation tree view.
+3. **Paste the Connection String** from your Application Insights resource into the appropriate field.
+4. **Save and Publish** your app.
 
-   ![Canvas App Telemetry Settings](../images/canvas-telemetry-settings.png)
+### Step 3: Play the Published App
 
-### Step 3: Configure Telemetry Options
+1. **Play the published app** and browse through its screens.
+2. Events will automatically be logged to Application Insights, including usage details like user access location, device type, and browser type.
+
+### Step 4: Configure Telemetry Options
 
 In the same Monitor settings panel, you can configure:
 
